@@ -5,7 +5,7 @@ PORT = 5678
 all: build run
 
 build:
-	docker build -t $(IMG)
+	docker build -t $(IMG) .
 
 run:
 	docker run --name $(CNT) -d -p $(PORT):5000 $(IMG)
