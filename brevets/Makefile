@@ -17,4 +17,4 @@ stop:
 	docker stop $(CNT)
 
 clean:
-	docker rmi -f $(CNT):latest
+	docker rmi -f $(IMG):latest
