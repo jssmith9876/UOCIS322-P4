@@ -120,53 +120,104 @@
             // you need to pass much more!
             // View flask_brevets.py for details.
             function calc_times(control) {
-              var km = control.find("input[name='km']").val();
-              var open_time_field = control.find("input[name='open']");
-              var close_time_field = control.find("input[name='close']");
+               var km = control.find("input[name='km']").val();
+               var open_time_field = control.find("input[name='open']");
+               var close_time_field = control.find("input[name='close']");
+               var dist = $("#brevet_dist_km option:selected").val();
+               var start_time = $("#begin_date").val();
 
-              $.getJSON(TIME_CALC_URL, {km: km}).done(
-                function(data) {
-                   var times = data.result;
-                   console.log("Got a response: ");
-                   console.log("Response.open = " + times.open);
-                   // This part will automatically fill the open and close slots,
-                   // so don't worry about those.
-                   open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
-                   close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm"));
-                 }
+               $.getJSON(TIME_CALC_URL, {km: km, dist: dist, start: start_time}).done(
+                  function(data) {
+                     var times = data.result;
+                     //  console.log("Got a response: ");
+                     //  console.log("Response.open = " + times.open);
+                     //  console.log(times);
+                     // This part will automatically fill the open and close slots,
+                     // so don't worry about those.
+                     open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
+                     close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm"));
+                  }
                ).fail(function(err){
-                 // In case you get an error...
-                 console.log("Error!");
-                 console.log(err);
+                  // In case you get an error...
+                  console.log("Error!");
+                  console.log(err);
                });
             }
 
+            function check_errors(control) {
+               // Get the needed fields
+               var brevet_dist = parseInt($("#brevet_dist_km option:selected").val());
+               var input_dist = parseInt(control.find("input[name='km']").val());
+               var notes = control.find(".notes");
+               var open_field = control.find("input[name='open']");
+               var close_field = control.find("input[name='close']");
+
+               
+               if (input_dist > brevet_dist) {
+                  // Check if input dist is more than 20% longer than brevet dist
+                  if (input_dist / brevet_dist > 1.20) {
+                     notes.text("Control distances must be less than 20% more than " + brevet_dist.toString() + "km.");
+                     open_field.val("");
+                     close_field.val("");
+
+                     return false;
+                  } else {
+                     notes.text("");
+                  }
+               } else {
+                  notes.text("");
+               }
+
+               return true;
+            }
+
             $(document).ready(function(){
-             // Do the following when the page is finished loading
+               // Do the following when the page is finished loading
 
-                $('input[name="miles"]').change(
-                   function() {
-                       var miles = parseFloat($(this).val());
-                       var km = (1.609344 * miles).toFixed(6) ;
-                       console.log("Converted " + miles + " miles to " + km + " kilometers");
-                       var control_entry = $(this).parents(".control")
-                       var target = control_entry.find("input[name='km']");
-                       target.val( km );
-                       // Then calculate times for this entry
-                       calc_times(control_entry);
-                    });
+               $('input[name="miles"]').keyup(
+                  function(event) {
+                     var input = String.fromCharCode(event.which);
+                     var miles = parseFloat($(this).val());
+                     var km = (1.609344 * miles).toFixed(6) ;
+                     // console.log("Converted " + miles + " miles to " + km + " kilometers");
+                     var control_entry = $(this).parents(".control");
+                     var target = control_entry.find("input[name='km']");
+                     target.val( km );
 
-                $('input[name="km"]').change(
-                   function() {
-                       var km = parseFloat($(this).val());
-                       var miles = (0.621371 * km).toFixed(6) ;
-                       console.log("Converted " + km + " km to " + miles + " miles");
-                       var control_entry = $(this).parents(".control")
-                       var target = control_entry.find("input[name='miles']");
-                       target.val( miles );
-                       // Then calculate times for this entry
-                       calc_times(control_entry);
-                    });
+                     // Only calculate the times if the user entered a proper char
+                     // 'keypress == 8' checks if the user entered BACKSPACE
+                     if ("0123456789.".includes(input) || keypress == 8) { 
+                        var res = check_errors(control_entry);
+
+                        if (res) {
+                           // Then calculate times for this entry
+                           calc_times(control_entry);
+                        } 
+                     }
+                  });
+
+               $('input[name="km"]').keyup(
+                  function(event) {
+                     var keypress = event.which;
+                     var input = String.fromCharCode(keypress);
+                     var km = parseFloat($(this).val());
+                     var miles = (0.621371 * km).toFixed(6) ;
+                     // console.log("Converted " + km + " km to " + miles + " miles");
+                     var control_entry = $(this).parents(".control");
+                     var target = control_entry.find("input[name='miles']");
+                     target.val( miles );  
+
+                     // Only calculate the times if the user entered a proper char
+                     // 'keypress == 8' checks if the user entered BACKSPACE
+                     if ("0123456789.".includes(input) || keypress == 8) { 
+                        var res = check_errors(control_entry);
+
+                        if (res) {
+                           // Then calculate times for this entry
+                           calc_times(control_entry);
+                        }
+                     }
+                  });
 
                });
 
