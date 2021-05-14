@@ -8,7 +8,7 @@ build:
 	docker build -t $(IMG) .
 
 run:
-	docker run --name $(CNT) -t -p $(PORT):5000 $(IMG)
+	docker run --name $(CNT) -d -p $(PORT):5000 $(IMG)
 
 start:
 	docker start $(CNT)
