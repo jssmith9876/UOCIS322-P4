@@ -86,7 +86,7 @@
                         <th>Notes</th>
                      </tr>
                      {% for row in range(20) %}
-                     <tr class="control">
+                     <tr class="control" id="{{ row }}">
                         <!-- Dist (mi) -->
                         <td><input name="miles" type="number" step="0.00001"
                            min="0" max="900" /></td>
@@ -110,10 +110,14 @@
                <!-- col -->
             </div>
             <!-- row -->
+            <div class="warnings"></div>
          </form>
          <script type="text/javascript">
             var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
             var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
+
+            var NUM_ROWS = 20;
+            var input_fields = new Array(NUM_ROWS).fill(NaN);
 
             // FIX ME!
             // Right now, only the kilometers are passed
@@ -144,6 +148,74 @@
                });
             }
 
+
+            /*
+            For a given array of numbers and NaN values:
+               Check if the non-NaN values in the array are sorted
+               Return the result
+            */
+            function check_sorted(values) {
+               // We only want to check numeric values
+               var real_values = [];
+               for (value of values) {
+                  if (!isNaN(value)) {
+                     real_values.push(value);
+                  }
+               }
+
+               // Store a sorted copy of the array
+               var sorted_cpy = [...real_values].sort(function(a, b){return a-b});
+
+               // Return if the array is the same as the sorted array
+               for (var i = 0; i < real_values.length; i++) {
+                  if (real_values[i] !== sorted_cpy[i]) {
+                     return false;
+                  }
+               }
+               return true;
+            }
+
+            /*
+            For a given control input field:
+               Check if there are any warnings with the given inputs
+               Return if there are warnings
+            */
+            function check_warnings(control) {
+               var brevet_dist = parseInt($("#brevet_dist_km option:selected").val());
+               var input_dist = parseInt(control.find("input[name='km']").val());
+
+               // Update the list of inputs that the user has entered
+               input_fields[control[0].id] = input_dist;
+               
+               // Check if the user has inputted a distance at least to the brevet distance
+               var has_final_dist = false;
+               for (input of input_fields) {
+                  if (input > brevet_dist) {
+                     has_final_dist = true;
+                  }
+               }
+
+               // Check if the values inputted are sorted
+               var is_ascending = check_sorted(input_fields);
+
+               // Display the proper warnings 
+               $(".warnings").text("")
+               if (!has_final_dist) {
+                  $(".warnings").append("<p>The last control distance must be at least " + brevet_dist + "km</p>");
+               }
+               if (!is_ascending) {
+                  $(".warnings").append("<p>The control distances must be in ascending order</p>");
+               }
+
+               // Return if there is a warning
+               return !has_final_dist || !is_ascending
+            }
+
+            /*
+            For a given control input field:
+               Check if there are any errors with the given inputs
+               Return if there are any errors
+            */
             function check_errors(control) {
                // Get the needed fields
                var brevet_dist = parseInt($("#brevet_dist_km option:selected").val());
@@ -152,7 +224,7 @@
                var open_field = control.find("input[name='open']");
                var close_field = control.find("input[name='close']");
 
-               
+               // Check if the user inputted a distance greater than the brevet distance
                if (input_dist > brevet_dist) {
                   // Check if input dist is more than 20% longer than brevet dist
                   if (input_dist / brevet_dist > 1.20) {
@@ -171,7 +243,7 @@
                return true;
             }
 
-            $(document).ready(function(){
+            $(document).ready(function() {
                // Do the following when the page is finished loading
 
                $('input[name="miles"]').keyup(

@@ -6,3 +6,6 @@
  * add more specific styles. 
  */
 
+.warnings {
+    color: #ff0000;
+}
