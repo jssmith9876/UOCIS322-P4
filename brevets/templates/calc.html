@@ -187,16 +187,21 @@
                // Update the list of inputs that the user has entered
                input_fields[control[0].id] = input_dist;
                
+               console.log(input_fields);
+               console.log(brevet_dist);
+
                // Check if the user has inputted a distance at least to the brevet distance
                var has_final_dist = false;
                for (input of input_fields) {
-                  if (input > brevet_dist) {
+                  if (input >= brevet_dist) {
                      has_final_dist = true;
                   }
                }
 
                // Check if the values inputted are sorted
                var is_ascending = check_sorted(input_fields);
+
+               console.log(has_final_dist);
 
                // Display the proper warnings 
                $(".warnings").text("")
@@ -259,6 +264,7 @@
                      // Only calculate the times if the user entered a proper char
                      // 'keypress == 8' checks if the user entered BACKSPACE
                      if ("0123456789.".includes(input) || keypress == 8) { 
+                        check_warnings(control_entry);
                         var res = check_errors(control_entry);
 
                         if (res) {
@@ -282,6 +288,7 @@
                      // Only calculate the times if the user entered a proper char
                      // 'keypress == 8' checks if the user entered BACKSPACE
                      if ("0123456789.".includes(input) || keypress == 8) { 
+                        check_warnings(control_entry);
                         var res = check_errors(control_entry);
 
                         if (res) {
