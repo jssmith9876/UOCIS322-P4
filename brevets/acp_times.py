@@ -46,7 +46,7 @@ def open_time(control_dist_km, brevet_dist_km, brevet_start_time):
       This will be in the same time zone as the brevet start time.
    """
    # Truncate the control distance
-   control_dist_km = int(control_dist_km)
+   control_dist_km = round(control_dist_km)
    max_total = 0
 
    # Work backwards through the intervals
@@ -71,7 +71,7 @@ def close_time(control_dist_km, brevet_dist_km, brevet_start_time):
       A date object indicating the control close time.
       This will be in the same time zone as the brevet start time.
    """
-   control_dist_km = int(control_dist_km)
+   control_dist_km = round(control_dist_km)
 
    # Max-control-cases 
    if (control_dist_km == brevet_dist_km):
