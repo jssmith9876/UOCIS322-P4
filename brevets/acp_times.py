@@ -49,12 +49,24 @@ def open_time(control_dist_km, brevet_dist_km, brevet_start_time):
    control_dist_km = round(control_dist_km)
    max_total = 0
 
-   # Work backwards through the intervals
-   for i in range(len(intervals) - 1, -1, -1):
-      if intervals[i] < control_dist_km:
-         diff = control_dist_km - intervals[i]
-         max_total += diff / max_speed[i]
-         control_dist_km -= diff
+   if (control_dist_km >= brevet_dist_km):
+      if brevet_dist_km == 200:
+         max_total = 5.88
+      elif brevet_dist_km == 300:
+         max_total = 9
+      elif brevet_dist_km == 400:
+         max_total = 12.13
+      elif brevet_dist_km == 600:
+         max_total = 18.8
+      elif brevet_dist_km == 1000:
+         max_total = 33.083
+   else:
+      # Work backwards through the intervals
+      for i in range(len(intervals) - 1, -1, -1):
+         if intervals[i] < control_dist_km:
+            diff = control_dist_km - intervals[i]
+            max_total += diff / max_speed[i]
+            control_dist_km -= diff
 
    return get_final(max_total, brevet_start_time)
 
@@ -74,16 +86,16 @@ def close_time(control_dist_km, brevet_dist_km, brevet_start_time):
    control_dist_km = round(control_dist_km)
 
    # Max-control-cases 
-   if (control_dist_km == brevet_dist_km):
-      if control_dist_km == 200:
+   if (control_dist_km >= brevet_dist_km):
+      if brevet_dist_km == 200:
          min_total = 13.5
-      elif control_dist_km == 300:
+      elif brevet_dist_km == 300:
          min_total = 20
-      elif control_dist_km == 400:
+      elif brevet_dist_km == 400:
          min_total = 27
-      elif control_dist_km == 600:
+      elif brevet_dist_km == 600:
          min_total = 40
-      elif control_dist_km == 1000:
+      elif brevet_dist_km == 1000:
          min_total = 75
    # Special case, if the control distance is between 0 and 60 km, the min-speed is 20 km/hr
    # and the total starts at 1 hour
